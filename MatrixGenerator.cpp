@@ -9,14 +9,13 @@ double MatrixGenerator::randomValue(double minValue, double maxValue){
   return minValue + factor * (maxValue - minValue);
 }
 
-MatrixGenerator::MatrixGenerator(string matrixType, int m, int n, int k, int w, string compression, string filename) {
-  this->m = m;
+MatrixGenerator::MatrixGenerator(int n, int k) {
+  this->m = n;
   this->n = n;
   this->k = k;
-  this->w = w;
-  this->filename = filename;
+  this->w = 2;
   minIndex = 0;
-  maxIndex = m -1;
+  maxIndex = n -1;
   minDiagValue = 1;
   maxDiagValue = 2;
   minValue = 0;
@@ -24,34 +23,34 @@ MatrixGenerator::MatrixGenerator(string matrixType, int m, int n, int k, int w, 
   srand(time(NULL));
 
   initializeMatrixAndVector();
+  executeComputing();
+}
 
-  if (matrixType == "a" || matrixType == "A"){
-    maxIndex = n -1;
-    generateMatrixA(true);
-  }
-  else if (matrixType == "b" || matrixType == "B") {
-    maxIndex = n -1;
-    generateMatrixB(true);
-  }
-  else if (matrixType == "c" || matrixType == "C") {
-    maxIndex = m -1;
-    generateMatrixC(true);
-  }
-  else if (matrixType == "d" || matrixType == "D") {
-    maxIndex = m -1;
-    generateMatrixD(true);
-  }
+void MatrixGenerator::executeComputing() {
+  maxIndex = n -1;
+  generateMatrixA(true);
+  saveAsCRS("CRS_A.txt");
+  saveAsCCS("CCS_A.txt");
+  multiplyMatrixVectorCRS("CRS_A.txt");
+  clearMatrix();
 
-  if (compression == "crs" || compression == "CRS") {
-    saveAsCRS();
-    //loadCRS(filename);    
-  }
-  else if (compression == "ccs" || compression == "CCS") {
-    saveAsCCS();
-    //loadCCS(filename);
-  }
+  maxIndex = n -1;
+  generateMatrixB(true);
+  saveAsCRS("CRS_B.txt");
+  saveAsCCS("CCS_Btxt");
+  clearMatrix();
 
-  multiplyMatrixVectorCRS(filename);
+  maxIndex = m -1;
+  generateMatrixC(true);
+  saveAsCRS("CRS_C.txt");
+  saveAsCCS("CCS_C.txt");
+  clearMatrix();
+
+  maxIndex = m -1;
+  generateMatrixD(true);
+  saveAsCRS("CRS_D.txt");
+  saveAsCCS("CCS_D.txt");
+  clearMatrix();  
 }
 
 void MatrixGenerator::initializeMatrixAndVector() {
@@ -74,28 +73,33 @@ void MatrixGenerator::initializeMatrixAndVector() {
     resultVector[i] = 0;
 }
 
+void MatrixGenerator::clearMatrix() {
+  for (int i=0 ; i<m ; i++){
+    for (int j=0 ; j<n ; j++){
+      matrix[i][j] = 0;
+    }
+  }
+}
+
 void MatrixGenerator::generateMatrixA(bool isPercent) {
   int numbersNotNull = k;
   if (isPercent)
     numbersNotNull = (int)(m*((double)numbersNotNull/100.0));
 
   for (int i=0 ; i<m ; i++) {
-    int numbersLeft = numbersNotNull;
-
+    matrix[i][i] = randomValue(minDiagValue, maxDiagValue);
+    int numbersLeft = numbersNotNull - 1;
     while (numbersLeft) {
       int index = randomIndex(maxIndex, maxIndex);
       if (matrix[i][index] == 0) {
-        if (i == index)
-          matrix[i][index] = randomValue(minDiagValue, maxDiagValue);
-        else
-          matrix[i][index] = randomValue(minValue, maxValue);
+        matrix[i][index] = randomValue(minValue, maxValue);
         numbersLeft--;
       }
     }
   }
 
   printMatrix();
-  cout << "Matrix test: " << ((testMatrixA(numbersNotNull) == true)?"passed":"failed");
+  cout << "Matrix test: " << ((testMatrixA(numbersNotNull) == true)?"passed":"failed") << endl;
 }
 
 void MatrixGenerator::generateMatrixB(bool isPercent) {
@@ -111,7 +115,7 @@ void MatrixGenerator::generateMatrixB(bool isPercent) {
     }
   }
   printMatrix();
-  cout << "Matrix test: passed";
+  cout << "Matrix test: passed" << endl;
 }
 
 void MatrixGenerator::generateMatrixC(bool isPercent) {
@@ -120,14 +124,11 @@ void MatrixGenerator::generateMatrixC(bool isPercent) {
     numbersNotNull = (int)(n*((double)numbersNotNull/100.0));
 
   for (int j=0 ; j<n ; j++) {
-    int numbersLeft = numbersNotNull;
-
+    matrix[j][j] = randomValue(minDiagValue, maxDiagValue);    
+    int numbersLeft = numbersNotNull - 1;
     while (numbersLeft) {
       int index = randomIndex(minIndex, maxIndex);
       if (matrix[index][j] == 0) {
-        if (j == index)
-          matrix[index][j] = randomValue(minDiagValue, maxDiagValue);
-        else
           matrix[index][j] = randomValue(minValue, maxValue);
         numbersLeft--;
       }
@@ -135,7 +136,7 @@ void MatrixGenerator::generateMatrixC(bool isPercent) {
   }
 
   printMatrix();
-  cout << "Matrix test: " << ((testMatrixC(numbersNotNull) == true)?"passed":"failed");
+  cout << "Matrix test: " << ((testMatrixC(numbersNotNull) == true)?"passed":"failed") << endl;
 }
 
 void MatrixGenerator::generateMatrixD(bool isPercent) {
@@ -151,11 +152,10 @@ void MatrixGenerator::generateMatrixD(bool isPercent) {
     }
   }
   printMatrix();
-  cout << "Matrix test: passed";
+  cout << "Matrix test: passed" << endl;
 }
 
 bool MatrixGenerator::testMatrixA(int numbersNotNull) {
-  cout << endl;
   for (int i=0 ; i<m ; i++){
     int notNull = 0;
     for (int j=0 ; j<n ; j++){
@@ -169,7 +169,6 @@ bool MatrixGenerator::testMatrixA(int numbersNotNull) {
 }
 
 bool MatrixGenerator::testMatrixC(int numbersNotNull) {
-  cout << endl;
   for (int j=0 ; j<n ; j++){
     int notNull = 0;
     for (int i=0 ; i<m ; i++){
@@ -191,7 +190,7 @@ void MatrixGenerator::printMatrix() {
     }
 }
 
-void MatrixGenerator::saveAsCRS(){
+void MatrixGenerator::saveAsCRS(string filename){
   CRS crs;
   int lastRow = 0;
   bool allNull = true;
@@ -207,14 +206,14 @@ void MatrixGenerator::saveAsCRS(){
         allNull = false;
       }
     }
-    if (allNull)
-      crs.rowPtr.push_back(-1);
+    // if (allNull)
+    //   crs.rowPtr.push_back(-1);
   }
 
-  saveCRSToFile(crs); 
+  saveCRSToFile(crs, filename); 
 }
 
-void MatrixGenerator::saveCRSToFile(CRS crs) {
+void MatrixGenerator::saveCRSToFile(CRS crs, string filename) {
   ofstream file;
   file.open(filename.c_str());
   file << m << " " << n << "\n";
@@ -249,23 +248,24 @@ CRS MatrixGenerator::loadCRS(string filename) {
     file >> x;
     crs.val.push_back(x);
   }
-  cout << endl;
   file >> colIdSize;
   for (int i=0 ; i<colIdSize ; i++) {
     int x;
     file >> x;
     crs.colId.push_back(x);
   }
-  cout << endl;
   file >> rowPtrSize;
   for (int i=0 ; i<rowPtrSize ; i++) {
     int x;
     file >> x;
     crs.rowPtr.push_back(x);
   }
-  cout << endl;
   file.close();
 
+  return crs;
+}
+
+void MatrixGenerator::decompressCRS(CRS crs) {
   double **matrixTest;
   matrixTest = new double*[m];
   for (int i=0 ; i<m ; i++)
@@ -279,18 +279,18 @@ CRS MatrixGenerator::loadCRS(string filename) {
   for (int i=0 ; i<m-1; i++) {
     int step = 0;
     if (i == m - 1)
-      step = valSize - crs.rowPtr[i];
+      step = crs.val.size() - crs.rowPtr[i];
     else if (crs.rowPtr[i] == -1)
       continue;
     else {
       if (crs.rowPtr[i+1] == -1){
         if (i+1 == m -1)
-          step = valSize - crs.rowPtr[i];
+          step = crs.val.size() - crs.rowPtr[i];
         else{
           int tmp = i+1;
           while (crs.rowPtr[tmp] == -1) {tmp++;}
           if (tmp == crs.rowPtr.size())
-            step = valSize - crs.rowPtr[i];
+            step = crs.val.size() - crs.rowPtr[i];
           else
             step = crs.rowPtr[tmp] - crs.rowPtr[i];
         }
@@ -303,8 +303,6 @@ CRS MatrixGenerator::loadCRS(string filename) {
       j++;
       step--;
     }
-
-    return crs;
   }
 
   cout << "Matrix test decompression CRS result: " << endl;
@@ -316,7 +314,7 @@ CRS MatrixGenerator::loadCRS(string filename) {
     }
 }
 
-void MatrixGenerator::saveAsCCS(){
+void MatrixGenerator::saveAsCCS(string filename){
   CCS ccs;
   int lastColumn = 0;
   bool allNull = true;
@@ -332,13 +330,13 @@ void MatrixGenerator::saveAsCCS(){
         allNull = false;
       }
     }
-    if (allNull)
-      ccs.colPtr.push_back(-1);
+    // if (allNull)
+    //   ccs.colPtr.push_back(-1);
   }
-  saveCCSToFile(ccs);
+  saveCCSToFile(ccs, filename);
 }
 
-void MatrixGenerator::saveCCSToFile(CCS ccs) {
+void MatrixGenerator::saveCCSToFile(CCS ccs, string filename) {
   ofstream file;
   file.open(filename.c_str());
   file << m << " " << n << "\n";
@@ -390,6 +388,10 @@ CCS MatrixGenerator::loadCCS(string filename) {
   cout << endl;
   file.close();
 
+  return ccs;
+}
+
+void MatrixGenerator::decompressCCS(CCS ccs) {
   double **matrixTest;
   matrixTest = new double*[m];
   for (int i=0 ; i<m ; i++)
@@ -403,18 +405,18 @@ CCS MatrixGenerator::loadCCS(string filename) {
   for (int j=0 ; j<n-1; j++) {
     int step = 0;
     if (j == n - 1)
-      step = valSize - ccs.colPtr[j];
+      step = ccs.val.size() - ccs.colPtr[j];
     else if (ccs.colPtr[j] == -1)
       continue;
     else {
       if (ccs.colPtr[j+1] == -1){
         if (j+1 == n -1)
-          step = valSize - ccs.colPtr[j];
+          step = ccs.val.size() - ccs.colPtr[j];
         else{
           int tmp = j+1;
           while (ccs.colPtr[tmp] == -1){tmp++;}
           if (tmp == ccs.colPtr.size())
-            step = valSize - ccs.colPtr[j];
+            step = ccs.val.size() - ccs.colPtr[j];
           else
             step =  ccs.colPtr[tmp] - ccs.colPtr[j];
         }
@@ -436,15 +438,13 @@ CCS MatrixGenerator::loadCCS(string filename) {
       if (j == n -1)
         cout << endl;
     }
-
-  return ccs;
 }
 
 void MatrixGenerator::multiplyMatrixVectorCRS(string filename) {
   CRS crs = loadCRS(filename);
 
   for (int i=0 ; i<n ; i++){
-    for (int j=crs.rowPtr[i] ; j<crs.rowPtr[i+1] -1 ; j++) {
+    for (int j=crs.rowPtr[i] ; j<crs.rowPtr[i+1] -2 ; j++) {
       resultVector[i] += crs.val[j] * multiVector[crs.colId[j]];
     }
   }
