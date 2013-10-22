@@ -13,7 +13,7 @@ MatrixGenerator::MatrixGenerator(int n, int k) {
   this->m = n;
   this->n = n;
   this->k = k;
-  this->w = 2;
+  this->w = 0.05*n;
   minIndex = 0;
   maxIndex = n -1;
   minDiagValue = 1;
@@ -24,68 +24,85 @@ MatrixGenerator::MatrixGenerator(int n, int k) {
   srand(time(NULL));
 
   initializeMatrixAndVector();
-  cout << "MultiVector: " << endl;
-  for (int i=0 ; i<n ; i++)
-    cout << multiVector[i] << " ";
-  cout << endl;
-    
+  
+  // cout << "MultiVector: " << endl;
+  // for (int i=0 ; i<n ; i++)
+  //   cout << multiVector[i] << " ";
+  // cout << endl;
+
   executeComputing();
 }
 
 void MatrixGenerator::executeComputing() {
   maxIndex = n -1;
   generateMatrixA(true);
+  //printMatrix();
   saveAsCRS("CRS_A.txt");
   saveAsCCS("CCS_A.txt");
   multiplyMatrixVectorCRS("CRS_A.txt");
   clearResultVector();
   multiplyMatrixVectorCCS("CCS_A.txt");
-  clearMatrix();
+  clearMatrixAndResultVector();
 
   maxIndex = n -1;
   generateMatrixB(true);
+  //printMatrix();
   saveAsCRS("CRS_B.txt");
   saveAsCCS("CCS_B.txt");
   multiplyMatrixVectorCRS("CRS_B.txt");
   clearResultVector();
   multiplyMatrixVectorCCS("CCS_B.txt");
-  clearMatrix();
+  clearMatrixAndResultVector();
 
   maxIndex = m -1;
   generateMatrixC(true);
+  //printMatrix();
   saveAsCRS("CRS_C.txt");
   saveAsCCS("CCS_C.txt");
   multiplyMatrixVectorCRS("CRS_C.txt");
   clearResultVector();
   multiplyMatrixVectorCCS("CCS_C.txt");
-  clearMatrix();
+  clearMatrixAndResultVector();
 
   maxIndex = m -1;
   generateMatrixD(true);
+  //printMatrix();
   saveAsCRS("CRS_D.txt");
   saveAsCCS("CCS_D.txt");
   multiplyMatrixVectorCRS("CRS_D.txt");
   clearResultVector();
   multiplyMatrixVectorCCS("CCS_D.txt");
-  clearMatrix();  
+  clearMatrixAndResultVector();  
 }
 
 void MatrixGenerator::initializeMatrixAndVector() {
   matrix = new double*[m];
   for (int i=0 ; i<m ; i++)
     matrix[i] = new double[n];
-
-  for (int i=0 ; i<m ; i++){
-    for (int j=0 ; j<n ; j++){
-      matrix[i][j] = 0;
-    }
-  }
+  clearMatrix();
 
   multiVector = new double[n];
   for (int i=0 ; i<n ; i++)
     multiVector[i] = randomValue(1, 2);
 
   resultVector = new double[n];
+  clearResultVector();
+}
+
+void MatrixGenerator::clearMatrixAndResultVector() {
+  clearMatrix();
+  clearResultVector();
+  notNullElementsCount = 0;
+
+  // for (int i=0 ; i<m ; i++)
+  //   delete [] matrix[i];
+  // delete matrix;
+  // delete resultVector;
+
+  //initializeMatrixAndVector();
+}
+
+void MatrixGenerator::clearResultVector() {
   for (int i=0 ; i<n ; i++)
     resultVector[i] = 0;
 }
@@ -96,13 +113,6 @@ void MatrixGenerator::clearMatrix() {
       matrix[i][j] = 0;
     }
   }
-  notNullElementsCount = 0;
-  clearResultVector();
-}
-
-void MatrixGenerator::clearResultVector() {
-  for (int i=0 ; i<n ; i++)
-  resultVector[i] = 0;
 }
 
 void MatrixGenerator::generateMatrixA(bool isPercent) {
@@ -112,20 +122,18 @@ void MatrixGenerator::generateMatrixA(bool isPercent) {
 
   for (int i=0 ; i<m ; i++) {
     matrix[i][i] = randomValue(minDiagValue, maxDiagValue);
-  notNullElementsCount++;
+    notNullElementsCount++;
     int numbersLeft = numbersNotNull - 1;
     while (numbersLeft) {
       int index = randomIndex(maxIndex, maxIndex);
       if (matrix[i][index] == 0) {
         matrix[i][index] = randomValue(minValue, maxValue);
-    notNullElementsCount++;
+        notNullElementsCount++;
         numbersLeft--;
       }
     }
   }
-
-  printMatrix();
-  cout << "Matrix test: " << ((testMatrixA(numbersNotNull) == true)?"passed":"failed") << endl;
+  cout << "MatrixA test: " << ((testMatrixA(numbersNotNull) == true)?"passed":"failed") << endl;
 }
 
 void MatrixGenerator::generateMatrixB(bool isPercent) {
@@ -143,8 +151,7 @@ void MatrixGenerator::generateMatrixB(bool isPercent) {
     notNullElementsCount++;
     }
   }
-  printMatrix();
-  cout << "Matrix test: passed" << endl;
+  cout << "MatrixB test: passed" << endl;
 }
 
 void MatrixGenerator::generateMatrixC(bool isPercent) {
@@ -154,20 +161,18 @@ void MatrixGenerator::generateMatrixC(bool isPercent) {
 
   for (int j=0 ; j<n ; j++) {
     matrix[j][j] = randomValue(minDiagValue, maxDiagValue); 
-  notNullElementsCount++;
+    notNullElementsCount++;
     int numbersLeft = numbersNotNull - 1;
     while (numbersLeft) {
       int index = randomIndex(minIndex, maxIndex);
       if (matrix[index][j] == 0) {
-          matrix[index][j] = randomValue(minValue, maxValue);
-      notNullElementsCount++;
+        matrix[index][j] = randomValue(minValue, maxValue);
+        notNullElementsCount++;
         numbersLeft--;
       }
     }
   }
-
-  printMatrix();
-  cout << "Matrix test: " << ((testMatrixC(numbersNotNull) == true)?"passed":"failed") << endl;
+  cout << "MatrixC test: " << ((testMatrixC(numbersNotNull) == true)?"passed":"failed") << endl;
 }
 
 void MatrixGenerator::generateMatrixD(bool isPercent) {
@@ -178,15 +183,14 @@ void MatrixGenerator::generateMatrixD(bool isPercent) {
         continue;
       if (i == j) {
         matrix[i][j] = randomValue(minDiagValue, maxDiagValue);
-    }
+      }
       else {
         matrix[i][j] = randomValue(minValue, maxValue);
     }
     notNullElementsCount++;
     }
   }
-  printMatrix();
-  cout << "Matrix test: passed" << endl;
+  cout << "MatrixD test: passed" << endl;
 }
 
 bool MatrixGenerator::testMatrixA(int numbersNotNull) {
@@ -203,7 +207,7 @@ bool MatrixGenerator::testMatrixA(int numbersNotNull) {
 }
 
 bool MatrixGenerator::testMatrixC(int numbersNotNull) {
-  for (int j=0 ; j<n ; j++){
+  for (int j=0 ; j<n ; j++) {
     int notNull = 0;
     for (int i=0 ; i<m ; i++){
       if (matrix[i][j] != 0)
@@ -476,6 +480,7 @@ void MatrixGenerator::decompressCCS(CCS ccs) {
 
 void MatrixGenerator::multiplyMatrixVectorCRS(string filename) {
   CRS *crs = loadCRS(filename);
+  clock_t start = clock();
 
   for (int i=0 ; i<m ; i++){
     for (int j=crs->rowPtr[i] ; j<crs->rowPtr[i+1] ; j++) {
@@ -483,11 +488,15 @@ void MatrixGenerator::multiplyMatrixVectorCRS(string filename) {
     }
   }
 
-  printResultVector("CRS");
+  clock_t stop = clock();
+  double elapsedSecs = double(stop - start) / CLOCKS_PER_SEC;
+  cout << "Time elapsed (sec) [CRS]: " << setprecision(6) << elapsedSecs << endl;
+  //printResultVector("CRS");
 }
 
 void MatrixGenerator::multiplyMatrixVectorCCS(string filename) {
   CCS *ccs = loadCCS(filename);
+  clock_t start = clock();
 
   for (int i=0 ; i<m ; i++){
     for (int j=ccs->colPtr[i] ; j<ccs->colPtr[i+1] ; j++) {
@@ -495,7 +504,10 @@ void MatrixGenerator::multiplyMatrixVectorCCS(string filename) {
     }
   }
 
-  printResultVector("CCS");
+  clock_t stop = clock();
+  double elapsedSecs = double(stop - start) / CLOCKS_PER_SEC;
+  cout << "Time elapsed (sec) [CCS]: " << setprecision(6) << elapsedSecs << endl;
+  //printResultVector("CCS");
 }
 
 void MatrixGenerator::printResultVector(string compression) {

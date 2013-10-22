@@ -5,6 +5,7 @@
 #include <ctime>
 #include <fstream>
 #include <iomanip>
+#include <ctime>
 #include "CRS.h"
 #include "CCS.h"
 using namespace std;
@@ -32,8 +33,9 @@ public:
   MatrixGenerator(int, int);
   void executeComputing();
   void initializeMatrixAndVector();
-  void clearMatrix();
+  void clearMatrixAndResultVector();
   void clearResultVector();
+  void clearMatrix();
   void generateMatrixA(bool);
   void generateMatrixB(bool);
   void generateMatrixC(bool);
