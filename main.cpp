@@ -1,8 +1,9 @@
-#include "MatrixGenerator.cpp"
+#include "MatrixGenerator.h"
 #include <sstream>
+#include <iostream>
 using namespace std;
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[]) {
   if (argc != 3) {
     cout << "USAGE: ./program.o [n] [k] (k: 0\%-100\%)" << endl;
     return 0;
@@ -10,6 +11,7 @@ int main(int argc, char *argv[]){
 
   int n = atoi(argv[1]);
   int k = atoi(argv[2]);
+
   if ((int)(n*n*((double)k/100.0) < n)) {
     cout << "[k]\% must be bigger" << endl;
     cout << "USAGE: ./program.o [a|b|c|d] [n] [k] [w] [crs|ccs] (k: 0\%-100\%)" << endl;
@@ -26,5 +28,3 @@ int main(int argc, char *argv[]){
   cout << endl;
   return 0;
 }
-
-// ./program.o [a|b|c|d] [m] [n] [k] [w] [crs|ccs] [filename]

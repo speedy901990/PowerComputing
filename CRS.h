@@ -1,3 +1,5 @@
+#ifndef CRS_H
+#define CRS_H
 #include <cstdlib>
 #include <vector>
 using namespace std;
@@ -10,3 +12,4 @@ class CRS{
 
 		CRS();
 };
+#endif

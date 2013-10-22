@@ -1,10 +1,12 @@
+#ifndef MATRIXGENERATOR_H
+#define MATRIXGENERATOR_H
 #include <cstdlib>
 #include <iostream>
 #include <ctime>
 #include <fstream>
 #include <iomanip>
-#include "CRS.cpp"
-#include "CCS.cpp"
+#include "CRS.h"
+#include "CCS.h"
 using namespace std;
 
 class MatrixGenerator {
@@ -13,6 +15,7 @@ public:
   int m, n; // matrix dim
   int k;  // not null %
   int w;  // strap width
+  int notNullElementsCount;
   double ** matrix;
   double * multiVector;
   double * resultVector;
@@ -30,6 +33,7 @@ public:
   void executeComputing();
   void initializeMatrixAndVector();
   void clearMatrix();
+  void clearResultVector();
   void generateMatrixA(bool);
   void generateMatrixB(bool);
   void generateMatrixC(bool);
@@ -40,8 +44,10 @@ public:
   void saveAsCCS(string);
   void saveCRSToFile(CRS, string);
   void saveCCSToFile(CCS, string);
-  CRS loadCRS(string);
-  CCS loadCCS(string);
+  CRS *loadCRS(string);
+  CCS *loadCCS(string);
   void decompressCRS(CRS);
   void decompressCCS(CCS);
+  void printResultVector(string);
 };
+#endif
