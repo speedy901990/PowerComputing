@@ -77,6 +77,7 @@ void MatrixGenerator::executeComputing() {
 }
 
 void MatrixGenerator::initializeMatrixAndVector() {
+  cout << "Initializing matrix and vector... " << flush;
   matrix = new double*[m];
   for (int i=0 ; i<m ; i++)
     matrix[i] = new double[n];
@@ -88,6 +89,7 @@ void MatrixGenerator::initializeMatrixAndVector() {
 
   resultVector = new double[n];
   clearResultVector();
+  cout << "done" << endl;
 }
 
 void MatrixGenerator::clearMatrixAndResultVector() {
@@ -117,6 +119,7 @@ void MatrixGenerator::clearMatrix() {
 }
 
 void MatrixGenerator::generateMatrixA(bool isPercent) {
+  cout << "Generating matrixA... " << flush;
   int numbersNotNull = k;
   if (isPercent)
     numbersNotNull = (int)(m*((double)numbersNotNull/100.0));
@@ -134,6 +137,7 @@ void MatrixGenerator::generateMatrixA(bool isPercent) {
       }
     }
   }
+  cout << "done" << endl;
   cout << "MatrixA test: " << ((testMatrixA(numbersNotNull) == true)?"passed":"failed") << endl;
 }
 
@@ -230,6 +234,7 @@ void MatrixGenerator::printMatrix() {
 }
 
 void MatrixGenerator::saveAsCRS(string filename){
+  cout << "Saving CRS... " << flush;
   CRS crs;
   int lastRow = 0;
   bool allNull = true;
@@ -251,6 +256,7 @@ void MatrixGenerator::saveAsCRS(string filename){
   crs.rowPtr.push_back(notNullElementsCount);
 
   saveCRSToFile(crs, filename); 
+  cout << "done" << endl;
 }
 
 void MatrixGenerator::saveCRSToFile(CRS crs, string filename) {
@@ -273,6 +279,7 @@ void MatrixGenerator::saveCRSToFile(CRS crs, string filename) {
 }
 
 CRS *MatrixGenerator::loadCRS(string filename) {
+  cout << "Loading CRS... " << flush;
   int m, n;
   int valSize;
   int colIdSize;
@@ -302,6 +309,7 @@ CRS *MatrixGenerator::loadCRS(string filename) {
   }
   file.close();
 
+  cout << "done" << endl;
   return crs;
 }
 
@@ -355,7 +363,8 @@ void MatrixGenerator::decompressCRS(CRS crs) {
 }
 
 void MatrixGenerator::saveAsCCS(string filename){
-  CCS ccs;
+ cout << "Saving CCS... " << flush; 
+ CCS ccs;
   int lastColumn = 0;
   bool allNull = true;
   for (int j=0 ; j<n ; j++) {
@@ -376,6 +385,7 @@ void MatrixGenerator::saveAsCCS(string filename){
   ccs.colPtr.push_back(notNullElementsCount);
 
   saveCCSToFile(ccs, filename);
+  cout << "done" << endl;
 }
 
 void MatrixGenerator::saveCCSToFile(CCS ccs, string filename) {
@@ -398,6 +408,7 @@ void MatrixGenerator::saveCCSToFile(CCS ccs, string filename) {
 }
 
 CCS *MatrixGenerator::loadCCS(string filename) {
+  cout << "Loading CCS... " << flush;
   int m, n;
   int valSize;
   int rowIdSize;
@@ -427,6 +438,7 @@ CCS *MatrixGenerator::loadCCS(string filename) {
   }
   file.close();
 
+  cout << "done" << endl;
   return ccs;
 }
 
@@ -481,6 +493,7 @@ void MatrixGenerator::decompressCCS(CCS ccs) {
 
 void MatrixGenerator::multiplyMatrixVectorCRS(string filename) {
   CRS *crs = loadCRS(filename);
+  cout << "Computing CRS... " << flush;
   timeval start, stop;
   gettimeofday(&start, 0);
 
@@ -491,6 +504,7 @@ void MatrixGenerator::multiplyMatrixVectorCRS(string filename) {
   }
 
   gettimeofday(&stop, 0);
+  cout << "done" << endl;
   long seconds = stop.tv_sec - start.tv_sec;
   long useconds = stop.tv_usec - start.tv_usec;
   double elapsedTime = (seconds * 1000 + useconds/1000.0) + 0.5;
@@ -500,6 +514,7 @@ void MatrixGenerator::multiplyMatrixVectorCRS(string filename) {
 
 void MatrixGenerator::multiplyMatrixVectorCCS(string filename) {
   CCS *ccs = loadCCS(filename);
+  cout << "Computing CCS... " << flush;
   timeval start, stop;
   gettimeofday(&start, 0);
 
@@ -510,6 +525,7 @@ void MatrixGenerator::multiplyMatrixVectorCCS(string filename) {
   }
   
   gettimeofday(&stop, 0);
+  cout << "done" << endl;
   long seconds = stop.tv_sec - start.tv_sec;
   long useconds = stop.tv_usec - start.tv_usec;
   double elapsedTime = (seconds * 1000 + useconds/1000.0) + 0.5;
