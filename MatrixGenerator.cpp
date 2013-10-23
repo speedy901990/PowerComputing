@@ -24,6 +24,8 @@ MatrixGenerator::MatrixGenerator(int n, int k) {
   notNullElementsCount = 0;
   srand(time(NULL));
 
+  cout << "NotNullElements: " << (int)((double)n*(double)n*(double)k/100.0)
+  
   initializeMatrixAndVector();
   
   // cout << "MultiVector: " << endl;
