@@ -1,4 +1,5 @@
 #include "MatrixGenerator.h"
+#include <sys/time.h>
 
 int MatrixGenerator::randomIndex(int mminIndex, int maxIndex){
    return minIndex + (rand() % (int)(maxIndex - minIndex + 1));
@@ -44,35 +45,35 @@ void MatrixGenerator::executeComputing() {
   multiplyMatrixVectorCCS("CCS_A.txt");
   clearMatrixAndResultVector();
 
-  maxIndex = n -1;
-  generateMatrixB(true);
-  //printMatrix();
-  saveAsCRS("CRS_B.txt");
-  saveAsCCS("CCS_B.txt");
-  multiplyMatrixVectorCRS("CRS_B.txt");
-  clearResultVector();
-  multiplyMatrixVectorCCS("CCS_B.txt");
-  clearMatrixAndResultVector();
+  // maxIndex = n -1;
+  // generateMatrixB(true);
+  // //printMatrix();
+  // saveAsCRS("CRS_B.txt");
+  // saveAsCCS("CCS_B.txt");
+  // multiplyMatrixVectorCRS("CRS_B.txt");
+  // clearResultVector();
+  // multiplyMatrixVectorCCS("CCS_B.txt");
+  // clearMatrixAndResultVector();
 
-  maxIndex = m -1;
-  generateMatrixC(true);
-  //printMatrix();
-  saveAsCRS("CRS_C.txt");
-  saveAsCCS("CCS_C.txt");
-  multiplyMatrixVectorCRS("CRS_C.txt");
-  clearResultVector();
-  multiplyMatrixVectorCCS("CCS_C.txt");
-  clearMatrixAndResultVector();
+  // maxIndex = m -1;
+  // generateMatrixC(true);
+  // //printMatrix();
+  // saveAsCRS("CRS_C.txt");
+  // saveAsCCS("CCS_C.txt");
+  // multiplyMatrixVectorCRS("CRS_C.txt");
+  // clearResultVector();
+  // multiplyMatrixVectorCCS("CCS_C.txt");
+  // clearMatrixAndResultVector();
 
-  maxIndex = m -1;
-  generateMatrixD(true);
-  //printMatrix();
-  saveAsCRS("CRS_D.txt");
-  saveAsCCS("CCS_D.txt");
-  multiplyMatrixVectorCRS("CRS_D.txt");
-  clearResultVector();
-  multiplyMatrixVectorCCS("CCS_D.txt");
-  clearMatrixAndResultVector();  
+  // maxIndex = m -1;
+  // generateMatrixD(true);
+  // //printMatrix();
+  // saveAsCRS("CRS_D.txt");
+  // saveAsCCS("CCS_D.txt");
+  // multiplyMatrixVectorCRS("CRS_D.txt");
+  // clearResultVector();
+  // multiplyMatrixVectorCCS("CCS_D.txt");
+  // clearMatrixAndResultVector();  
 }
 
 void MatrixGenerator::initializeMatrixAndVector() {
@@ -480,7 +481,8 @@ void MatrixGenerator::decompressCCS(CCS ccs) {
 
 void MatrixGenerator::multiplyMatrixVectorCRS(string filename) {
   CRS *crs = loadCRS(filename);
-  clock_t start = clock();
+  timeval start, stop;
+  gettimeofday(&start, 0);
 
   for (int i=0 ; i<m ; i++){
     for (int j=crs->rowPtr[i] ; j<crs->rowPtr[i+1] ; j++) {
@@ -488,25 +490,30 @@ void MatrixGenerator::multiplyMatrixVectorCRS(string filename) {
     }
   }
 
-  clock_t stop = clock();
-  double elapsedSecs = double(stop - start) / CLOCKS_PER_SEC;
-  cout << "Time elapsed (sec) [CRS]: " << setprecision(6) << elapsedSecs << endl;
-  //printResultVector("CRS");
+  gettimeofday(&stop, 0);
+  long seconds = stop.tv_sec - start.tv_sec;
+  long useconds = stop.tv_usec - start.tv_usec;
+  double elapsedTime = (seconds * 1000 + useconds/1000.0) + 0.5;
+  cout << "Time elapsed (ms) [CRS]: " << setprecision(6) << elapsedTime << endl;
+  //qprintResultVector("CRS");
 }
 
 void MatrixGenerator::multiplyMatrixVectorCCS(string filename) {
   CCS *ccs = loadCCS(filename);
-  clock_t start = clock();
+  timeval start, stop;
+  gettimeofday(&start, 0);
 
   for (int i=0 ; i<m ; i++){
     for (int j=ccs->colPtr[i] ; j<ccs->colPtr[i+1] ; j++) {
       resultVector[ccs->rowId[j]] += ccs->val[j] * multiVector[i];
     }
   }
-
-  clock_t stop = clock();
-  double elapsedSecs = double(stop - start) / CLOCKS_PER_SEC;
-  cout << "Time elapsed (sec) [CCS]: " << setprecision(6) << elapsedSecs << endl;
+  
+  gettimeofday(&stop, 0);
+  long seconds = stop.tv_sec - start.tv_sec;
+  long useconds = stop.tv_usec - start.tv_usec;
+  double elapsedTime = (seconds * 1000 + useconds/1000.0) + 0.5;
+  cout << "Time elapsed (ms) [CCS]: " << setprecision(6) << elapsedTime << endl;
   //printResultVector("CCS");
 }
 
