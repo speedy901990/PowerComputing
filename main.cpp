@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
   int n = atoi(argv[1]);
   int k = atoi(argv[2]);
 
-  if ((int)(n*n*((double)k/100.0) < n)) {
+  if ((int)((double)n*(double)n*((double)k/100.0) < n)) {
     cout << "[k]\% must be bigger" << endl;
     cout << "USAGE: ./program.o [n] [k] (k: 0\%-100\%)" << endl;
     return 0;

@@ -122,7 +122,7 @@ void MatrixGenerator::generateMatrixA(bool isPercent) {
   cout << "Generating matrixA... " << flush;
   int numbersNotNull = k;
   if (isPercent)
-    numbersNotNull = (int)(m*((double)numbersNotNull/100.0));
+    numbersNotNull = (int)((double)m*((double)numbersNotNull/100.0));
 
   for (int i=0 ; i<m ; i++) {
     matrix[i][i] = randomValue(minDiagValue, maxDiagValue);
@@ -162,7 +162,7 @@ void MatrixGenerator::generateMatrixB(bool isPercent) {
 void MatrixGenerator::generateMatrixC(bool isPercent) {
   int numbersNotNull = k;
   if (isPercent)
-    numbersNotNull = (int)(n*((double)numbersNotNull/100.0));
+    numbersNotNull = (int)((double)n*((double)numbersNotNull/100.0));
 
   for (int j=0 ; j<n ; j++) {
     matrix[j][j] = randomValue(minDiagValue, maxDiagValue); 
