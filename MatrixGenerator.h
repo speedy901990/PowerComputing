@@ -51,5 +51,9 @@ public:
   void decompressCRS(CRS);
   void decompressCCS(CCS);
   void printResultVector(string);
+  void algorithmOneCRS(CRS*);
+  void algorithmTwoCRS(CRS*);
+  void algorithmOneCCS(CCS*);
+  void algorithmTwoCCS(CCS*);
 };
 #endif

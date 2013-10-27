@@ -10,6 +10,9 @@ int main(int argc, char *argv[]) {
   }
 
   int n = atoi(argv[1]);
+  while (n%10 != 0) {
+	n++;
+  }
   int k = atoi(argv[2]);
 
   if ((int)((double)n*(double)n*((double)k/100.0) < n)) {

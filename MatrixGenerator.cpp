@@ -24,10 +24,10 @@ MatrixGenerator::MatrixGenerator(int n, int k) {
   notNullElementsCount = 0;
   srand(time(NULL));
 
-  cout << "NotNullElements: " << (int)((double)n*(double)n*(double)k/100.0)
+  cout << "NotNullElements: " << (int)((double)n*(double)n*(double)k/100.0) << endl;
   
   initializeMatrixAndVector();
-  
+  cout << endl;
   // cout << "MultiVector: " << endl;
   // for (int i=0 ; i<n ; i++)
   //   cout << multiVector[i] << " ";
@@ -46,36 +46,39 @@ void MatrixGenerator::executeComputing() {
   clearResultVector();
   multiplyMatrixVectorCCS("CCS_A.txt");
   clearMatrixAndResultVector();
+  cout << endl;
 
-  // maxIndex = n -1;
-  // generateMatrixB(true);
-  // //printMatrix();
-  // saveAsCRS("CRS_B.txt");
-  // saveAsCCS("CCS_B.txt");
-  // multiplyMatrixVectorCRS("CRS_B.txt");
-  // clearResultVector();
-  // multiplyMatrixVectorCCS("CCS_B.txt");
-  // clearMatrixAndResultVector();
+  maxIndex = n -1;
+  generateMatrixB(true);
+  //printMatrix();
+  saveAsCRS("CRS_B.txt");
+  saveAsCCS("CCS_B.txt");
+  multiplyMatrixVectorCRS("CRS_B.txt");
+  clearResultVector();
+  multiplyMatrixVectorCCS("CCS_B.txt");
+  clearMatrixAndResultVector();
+  cout << endl;
 
-  // maxIndex = m -1;
-  // generateMatrixC(true);
-  // //printMatrix();
-  // saveAsCRS("CRS_C.txt");
-  // saveAsCCS("CCS_C.txt");
-  // multiplyMatrixVectorCRS("CRS_C.txt");
-  // clearResultVector();
-  // multiplyMatrixVectorCCS("CCS_C.txt");
-  // clearMatrixAndResultVector();
+  maxIndex = m -1;
+  generateMatrixC(true);
+  //printMatrix();
+  saveAsCRS("CRS_C.txt");
+  saveAsCCS("CCS_C.txt");
+  multiplyMatrixVectorCRS("CRS_C.txt");
+  clearResultVector();
+  multiplyMatrixVectorCCS("CCS_C.txt");
+  clearMatrixAndResultVector();
+  cout << endl;
 
-  // maxIndex = m -1;
-  // generateMatrixD(true);
-  // //printMatrix();
-  // saveAsCRS("CRS_D.txt");
-  // saveAsCCS("CCS_D.txt");
-  // multiplyMatrixVectorCRS("CRS_D.txt");
-  // clearResultVector();
-  // multiplyMatrixVectorCCS("CCS_D.txt");
-  // clearMatrixAndResultVector();  
+  maxIndex = m -1;
+  generateMatrixD(true);
+  //printMatrix();
+  saveAsCRS("CRS_D.txt");
+  saveAsCCS("CCS_D.txt");
+  multiplyMatrixVectorCRS("CRS_D.txt");
+  clearResultVector();
+  multiplyMatrixVectorCCS("CCS_D.txt");
+  clearMatrixAndResultVector();  
 }
 
 void MatrixGenerator::initializeMatrixAndVector() {
@@ -144,6 +147,7 @@ void MatrixGenerator::generateMatrixA(bool isPercent) {
 }
 
 void MatrixGenerator::generateMatrixB(bool isPercent) {
+  cout << "Generating matrixB... " << flush;
   int UpDown = 0;
   for (int i=0 ; i<m ; i++) {
     for (int j=i-w+UpDown ; j<=i+w+UpDown ; j++) {
@@ -158,10 +162,12 @@ void MatrixGenerator::generateMatrixB(bool isPercent) {
     notNullElementsCount++;
     }
   }
+  cout << "done" << endl;
   cout << "MatrixB test: passed" << endl;
 }
 
 void MatrixGenerator::generateMatrixC(bool isPercent) {
+  cout << "Generating matrixC... " << flush;
   int numbersNotNull = k;
   if (isPercent)
     numbersNotNull = (int)((double)n*((double)numbersNotNull/100.0));
@@ -179,10 +185,12 @@ void MatrixGenerator::generateMatrixC(bool isPercent) {
       }
     }
   }
+  cout << "done" << endl;
   cout << "MatrixC test: " << ((testMatrixC(numbersNotNull) == true)?"passed":"failed") << endl;
 }
 
 void MatrixGenerator::generateMatrixD(bool isPercent) {
+  cout << "Generating matrixD... " << flush;
   int UpDown = 0;
   for (int i=0 ; i<m ; i++) {
     for (int j=i-w+UpDown ; j<=i+w+UpDown ; j++) {
@@ -197,6 +205,7 @@ void MatrixGenerator::generateMatrixD(bool isPercent) {
     notNullElementsCount++;
     }
   }
+  cout << "done" << endl;
   cout << "MatrixD test: passed" << endl;
 }
 
@@ -495,6 +504,12 @@ void MatrixGenerator::decompressCCS(CCS ccs) {
 
 void MatrixGenerator::multiplyMatrixVectorCRS(string filename) {
   CRS *crs = loadCRS(filename);
+  algorithmOneCRS(crs);
+  clearResultVector();
+  algorithmTwoCRS(crs);
+}
+
+void MatrixGenerator::algorithmOneCRS(CRS *crs) {
   cout << "Computing CRS... " << flush;
   timeval start, stop;
   gettimeofday(&start, 0);
@@ -506,16 +521,70 @@ void MatrixGenerator::multiplyMatrixVectorCRS(string filename) {
   }
 
   gettimeofday(&stop, 0);
-  cout << "done" << endl;
+  cout << "done ver. 1" << endl;
   long seconds = stop.tv_sec - start.tv_sec;
   long useconds = stop.tv_usec - start.tv_usec;
   double elapsedTime = (seconds * 1000 + useconds/1000.0) + 0.5;
   cout << "Time elapsed (ms) [CRS]: " << setprecision(6) << elapsedTime << endl;
-  //qprintResultVector("CRS");
+  //printResultVector("CRS");
+}
+
+void MatrixGenerator::algorithmTwoCRS(CRS *crs) {
+  cout << "Computing CRS... " << flush;
+  timeval start, stop;
+  gettimeofday(&start, 0);
+
+  for (int i=0 ; i<m ; i+=10){
+    for (int j=crs->rowPtr[i] ; j<crs->rowPtr[i+1] ; j++) {
+      resultVector[i] += crs->val[j] * multiVector[crs->colId[j]];
+    }
+	for (int j=crs->rowPtr[i+1] ; j<crs->rowPtr[i+2] ; j++) {
+      resultVector[i+1] += crs->val[j] * multiVector[crs->colId[j]];
+    }
+	for (int j=crs->rowPtr[i+2] ; j<crs->rowPtr[i+3] ; j++) {
+      resultVector[i+2] += crs->val[j] * multiVector[crs->colId[j]];
+    }
+	for (int j=crs->rowPtr[i+3] ; j<crs->rowPtr[i+4] ; j++) {
+      resultVector[i+3] += crs->val[j] * multiVector[crs->colId[j]];
+    }
+	for (int j=crs->rowPtr[i+4] ; j<crs->rowPtr[i+5] ; j++) {
+      resultVector[i+4] += crs->val[j] * multiVector[crs->colId[j]];
+    }
+	for (int j=crs->rowPtr[i+5] ; j<crs->rowPtr[i+6] ; j++) {
+      resultVector[i+5] += crs->val[j] * multiVector[crs->colId[j]];
+    }
+	for (int j=crs->rowPtr[i+6] ; j<crs->rowPtr[i+7] ; j++) {
+      resultVector[i+6] += crs->val[j] * multiVector[crs->colId[j]];
+    }
+	for (int j=crs->rowPtr[i+7] ; j<crs->rowPtr[i+8] ; j++) {
+      resultVector[i+7] += crs->val[j] * multiVector[crs->colId[j]];
+    }
+	for (int j=crs->rowPtr[i+8] ; j<crs->rowPtr[i+9] ; j++) {
+      resultVector[i+8] += crs->val[j] * multiVector[crs->colId[j]];
+    }
+	for (int j=crs->rowPtr[i+9] ; j<crs->rowPtr[i+10] ; j++) {
+      resultVector[i+9] += crs->val[j] * multiVector[crs->colId[j]];
+    }
+
+  }
+
+  gettimeofday(&stop, 0);
+  cout << "done ver. 2" << endl;
+  long seconds = stop.tv_sec - start.tv_sec;
+  long useconds = stop.tv_usec - start.tv_usec;
+  double elapsedTime = (seconds * 1000 + useconds/1000.0) + 0.5;
+  cout << "Time elapsed (ms) [CRS]: " << setprecision(6) << elapsedTime << endl;
+  //printResultVector("CRS");
 }
 
 void MatrixGenerator::multiplyMatrixVectorCCS(string filename) {
   CCS *ccs = loadCCS(filename);
+  algorithmOneCCS(ccs);
+  clearResultVector();
+  algorithmTwoCCS(ccs);
+}
+
+void MatrixGenerator::algorithmOneCCS(CCS *ccs) {
   cout << "Computing CCS... " << flush;
   timeval start, stop;
   gettimeofday(&start, 0);
@@ -527,7 +596,54 @@ void MatrixGenerator::multiplyMatrixVectorCCS(string filename) {
   }
   
   gettimeofday(&stop, 0);
-  cout << "done" << endl;
+  cout << "done ver. 1" << endl;
+  long seconds = stop.tv_sec - start.tv_sec;
+  long useconds = stop.tv_usec - start.tv_usec;
+  double elapsedTime = (seconds * 1000 + useconds/1000.0) + 0.5;
+  cout << "Time elapsed (ms) [CCS]: " << setprecision(6) << elapsedTime << endl;
+  //printResultVector("CCS");
+}
+
+void MatrixGenerator::algorithmTwoCCS(CCS *ccs) {
+  cout << "Computing CCS... " << flush;
+  timeval start, stop;
+  gettimeofday(&start, 0);
+
+  for (int i=0 ; i<m ; i+=10){
+    for (int j=ccs->colPtr[i] ; j<ccs->colPtr[i+1] ; j++) {
+      resultVector[ccs->rowId[j]] += ccs->val[j] * multiVector[i];
+    }
+    for (int j=ccs->colPtr[i+1] ; j<ccs->colPtr[i+2] ; j++) {
+      resultVector[ccs->rowId[j]] += ccs->val[j] * multiVector[i+1];
+    }
+    for (int j=ccs->colPtr[i+2] ; j<ccs->colPtr[i+3] ; j++) {
+      resultVector[ccs->rowId[j]] += ccs->val[j] * multiVector[i+2];
+    }
+    for (int j=ccs->colPtr[i+3] ; j<ccs->colPtr[i+4] ; j++) {
+      resultVector[ccs->rowId[j]] += ccs->val[j] * multiVector[i+3];
+    }
+    for (int j=ccs->colPtr[i+4] ; j<ccs->colPtr[i+5] ; j++) {
+      resultVector[ccs->rowId[j]] += ccs->val[j] * multiVector[i+4];
+    }
+    for (int j=ccs->colPtr[i+5] ; j<ccs->colPtr[i+6] ; j++) {
+      resultVector[ccs->rowId[j]] += ccs->val[j] * multiVector[i+5];
+    }
+    for (int j=ccs->colPtr[i+6] ; j<ccs->colPtr[i+7] ; j++) {
+      resultVector[ccs->rowId[j]] += ccs->val[j] * multiVector[i+6];
+    }
+    for (int j=ccs->colPtr[i+7] ; j<ccs->colPtr[i+8] ; j++) {
+      resultVector[ccs->rowId[j]] += ccs->val[j] * multiVector[i+7];
+    }
+    for (int j=ccs->colPtr[i+8] ; j<ccs->colPtr[i+9] ; j++) {
+      resultVector[ccs->rowId[j]] += ccs->val[j] * multiVector[i+8];
+    }
+    for (int j=ccs->colPtr[i+9] ; j<ccs->colPtr[i+10] ; j++) {
+      resultVector[ccs->rowId[j]] += ccs->val[j] * multiVector[i+9];
+    }
+  }
+  
+  gettimeofday(&stop, 0);
+  cout << "done ver. 2" << endl;
   long seconds = stop.tv_sec - start.tv_sec;
   long useconds = stop.tv_usec - start.tv_usec;
   double elapsedTime = (seconds * 1000 + useconds/1000.0) + 0.5;
