@@ -1,5 +1,6 @@
 #include "MatrixGenerator.h"
-#include <sys/time.h>
+#include "timeSurvey.h"
+//#include <sys/time.h>
 
 int MatrixGenerator::randomIndex(int mminIndex, int maxIndex){
    return minIndex + (rand() % (int)(maxIndex - minIndex + 1));
@@ -511,8 +512,9 @@ void MatrixGenerator::multiplyMatrixVectorCRS(string filename) {
 
 void MatrixGenerator::algorithmOneCRS(CRS *crs) {
   cout << "Computing CRS... " << flush;
-  timeval start, stop;
-  gettimeofday(&start, 0);
+  // timeval start, stop;
+  // gettimeofday(&start, 0);
+  initializeTime();
 
   for (int i=0 ; i<m ; i++){
     for (int j=crs->rowPtr[i] ; j<crs->rowPtr[i+1] ; j++) {
@@ -520,19 +522,21 @@ void MatrixGenerator::algorithmOneCRS(CRS *crs) {
     }
   }
 
-  gettimeofday(&stop, 0);
+  // gettimeofday(&stop, 0);
   cout << "done ver. 1" << endl;
-  long seconds = stop.tv_sec - start.tv_sec;
-  long useconds = stop.tv_usec - start.tv_usec;
-  double elapsedTime = (seconds * 1000 + useconds/1000.0) + 0.5;
-  cout << "Time elapsed (ms) [CRS]: " << setprecision(6) << elapsedTime << endl;
+  // long seconds = stop.tv_sec - start.tv_sec;
+  // long useconds = stop.tv_usec - start.tv_usec;
+  // double elapsedTime = (seconds * 1000 + useconds/1000.0) + 0.5;
+  cout << "->Time elapsed [CRS]: " << endl;// setprecision(6) << elapsedTime << endl;
+  printTime();
   //printResultVector("CRS");
 }
 
 void MatrixGenerator::algorithmTwoCRS(CRS *crs) {
   cout << "Computing CRS... " << flush;
-  timeval start, stop;
-  gettimeofday(&start, 0);
+  // timeval start, stop;
+  // gettimeofday(&start, 0);
+  initializeTime();
 
   for (int i=0 ; i<m ; i+=10){
     for (int j=crs->rowPtr[i] ; j<crs->rowPtr[i+1] ; j++) {
@@ -568,12 +572,13 @@ void MatrixGenerator::algorithmTwoCRS(CRS *crs) {
 
   }
 
-  gettimeofday(&stop, 0);
+  // gettimeofday(&stop, 0);
   cout << "done ver. 2" << endl;
-  long seconds = stop.tv_sec - start.tv_sec;
-  long useconds = stop.tv_usec - start.tv_usec;
-  double elapsedTime = (seconds * 1000 + useconds/1000.0) + 0.5;
-  cout << "Time elapsed (ms) [CRS]: " << setprecision(6) << elapsedTime << endl;
+  // long seconds = stop.tv_sec - start.tv_sec;
+  // long useconds = stop.tv_usec - start.tv_usec;
+  // double elapsedTime = (seconds * 1000 + useconds/1000.0) + 0.5;
+  cout << "->Time elapsed [CRS]: " << endl; //setprecision(6) << elapsedTime << endl;
+  printTime();
   //printResultVector("CRS");
 }
 
@@ -586,8 +591,9 @@ void MatrixGenerator::multiplyMatrixVectorCCS(string filename) {
 
 void MatrixGenerator::algorithmOneCCS(CCS *ccs) {
   cout << "Computing CCS... " << flush;
-  timeval start, stop;
-  gettimeofday(&start, 0);
+  // timeval start, stop;
+  // gettimeofday(&start, 0);
+  initializeTime();
 
   for (int i=0 ; i<m ; i++){
     for (int j=ccs->colPtr[i] ; j<ccs->colPtr[i+1] ; j++) {
@@ -595,19 +601,21 @@ void MatrixGenerator::algorithmOneCCS(CCS *ccs) {
     }
   }
   
-  gettimeofday(&stop, 0);
+  // gettimeofday(&stop, 0);
   cout << "done ver. 1" << endl;
-  long seconds = stop.tv_sec - start.tv_sec;
-  long useconds = stop.tv_usec - start.tv_usec;
-  double elapsedTime = (seconds * 1000 + useconds/1000.0) + 0.5;
-  cout << "Time elapsed (ms) [CCS]: " << setprecision(6) << elapsedTime << endl;
+  // long seconds = stop.tv_sec - start.tv_sec;
+  // long useconds = stop.tv_usec - start.tv_usec;
+  // double elapsedTime = (seconds * 1000 + useconds/1000.0) + 0.5;
+  cout << "->Time elapsed [CCS]: " << endl;// setprecision(6) << elapsedTime << endl;
+  printTime();
   //printResultVector("CCS");
 }
 
 void MatrixGenerator::algorithmTwoCCS(CCS *ccs) {
   cout << "Computing CCS... " << flush;
-  timeval start, stop;
-  gettimeofday(&start, 0);
+  // timeval start, stop;
+  // gettimeofday(&start, 0);
+  initializeTime();
 
   for (int i=0 ; i<m ; i+=10){
     for (int j=ccs->colPtr[i] ; j<ccs->colPtr[i+1] ; j++) {
@@ -642,12 +650,13 @@ void MatrixGenerator::algorithmTwoCCS(CCS *ccs) {
     }
   }
   
-  gettimeofday(&stop, 0);
+  // gettimeofday(&stop, 0);
   cout << "done ver. 2" << endl;
-  long seconds = stop.tv_sec - start.tv_sec;
-  long useconds = stop.tv_usec - start.tv_usec;
-  double elapsedTime = (seconds * 1000 + useconds/1000.0) + 0.5;
-  cout << "Time elapsed (ms) [CCS]: " << setprecision(6) << elapsedTime << endl;
+  // long seconds = stop.tv_sec - start.tv_sec;
+  // long useconds = stop.tv_usec - start.tv_usec;
+  // double elapsedTime = (seconds * 1000 + useconds/1000.0) + 0.5;
+  cout << "->Time elapsed [CCS]: " << endl;// setprecision(6) << elapsedTime << endl;
+  printTime();
   //printResultVector("CCS");
 }
 
