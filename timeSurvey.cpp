@@ -2,6 +2,7 @@
 #include <ctime>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <iomanip>
 #include <iostream>
 #include "timeSurvey.h"
 using namespace std;
@@ -71,13 +72,13 @@ void printTime()
   
   stdtime = (double) (time - ct) / (double)  CLOCKS_PER_SEC ;
 
-  cputime = ( rk.ru_utime.tv_usec - rp.ru_utime.tv_usec ) / 1.0e6 ;
+   cputime = ( rk.ru_utime.tv_usec - rp.ru_utime.tv_usec ) / 1.0e6 ;
   cputime += rk.ru_utime.tv_sec - rp.ru_utime.tv_sec;
   
   daytime = ( tk.tv_usec - tp.tv_usec ) / 1.0e6 + tk.tv_sec - tp.tv_sec ;
   
   cout << "-->Standard time: " << stdtime << endl;
-  cout << "-->CPU time: " << cputime << endl;
+  cout << setprecision(10) <<  "-->CPU time: " << cputime << endl;
   cout << "-->Day time: " << daytime << endl;
   
 }

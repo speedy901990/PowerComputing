@@ -22,6 +22,7 @@ public:
   double * resultVector;
   int minIndex, maxIndex; //index random
   double minDiagValue, maxDiagValue, minValue, maxValue; //value random bounds
+  int numThreads;
 
   int randomIndex(int, int);
   double randomValue(double, double);
@@ -55,5 +56,9 @@ public:
   void algorithmTwoCRS(CRS*);
   void algorithmOneCCS(CCS*);
   void algorithmTwoCCS(CCS*);
+  void parallelOpenMP_CRS(CRS*);
+  void parallelPthreads_CRS(CRS*);
+  void parallelMPI_CRS(CRS*);
+  //void *algorithmForThread(void*);
 };
 #endif

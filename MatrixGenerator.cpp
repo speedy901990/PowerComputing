@@ -24,6 +24,7 @@ MatrixGenerator::MatrixGenerator(int n, int k) {
   maxValue = 1; 
   notNullElementsCount = 0;
   srand(time(NULL));
+  numThreads = 4;
 
   cout << "NotNullElements: " << (int)((double)n*(double)n*(double)k/100.0) << endl;
   
@@ -42,44 +43,44 @@ void MatrixGenerator::executeComputing() {
   generateMatrixA(true);
   //printMatrix();
   saveAsCRS("CRS_A.txt");
-  saveAsCCS("CCS_A.txt");
+  //saveAsCCS("CCS_A.txt");
   multiplyMatrixVectorCRS("CRS_A.txt");
   clearResultVector();
-  multiplyMatrixVectorCCS("CCS_A.txt");
-  clearMatrixAndResultVector();
+  //multiplyMatrixVectorCCS("CCS_A.txt");
+  //clearMatrixAndResultVector();
   cout << endl;
 
-  maxIndex = n -1;
-  generateMatrixB(true);
+  //maxIndex = n -1;
+  //generateMatrixB(true);
   //printMatrix();
-  saveAsCRS("CRS_B.txt");
-  saveAsCCS("CCS_B.txt");
-  multiplyMatrixVectorCRS("CRS_B.txt");
-  clearResultVector();
-  multiplyMatrixVectorCCS("CCS_B.txt");
-  clearMatrixAndResultVector();
-  cout << endl;
+  //saveAsCRS("CRS_B.txt");
+  //saveAsCCS("CCS_B.txt");
+  //multiplyMatrixVectorCRS("CRS_B.txt");
+  //clearResultVector();
+  //multiplyMatrixVectorCCS("CCS_B.txt");
+  //clearMatrixAndResultVector();
+  //cout << endl;
 
-  maxIndex = m -1;
-  generateMatrixC(true);
+  //maxIndex = m -1;
+  //generateMatrixC(true);
   //printMatrix();
-  saveAsCRS("CRS_C.txt");
-  saveAsCCS("CCS_C.txt");
-  multiplyMatrixVectorCRS("CRS_C.txt");
-  clearResultVector();
-  multiplyMatrixVectorCCS("CCS_C.txt");
-  clearMatrixAndResultVector();
-  cout << endl;
+  //saveAsCRS("CRS_C.txt");
+  //saveAsCCS("CCS_C.txt");
+  //multiplyMatrixVectorCRS("CRS_C.txt");
+  //clearResultVector();
+  //multiplyMatrixVectorCCS("CCS_C.txt");
+  //clearMatrixAndResultVector();
+  //cout << endl;
 
-  maxIndex = m -1;
-  generateMatrixD(true);
+  //maxIndex = m -1;
+  //generateMatrixD(true);
   //printMatrix();
-  saveAsCRS("CRS_D.txt");
-  saveAsCCS("CCS_D.txt");
-  multiplyMatrixVectorCRS("CRS_D.txt");
-  clearResultVector();
-  multiplyMatrixVectorCCS("CCS_D.txt");
-  clearMatrixAndResultVector();  
+  //saveAsCRS("CRS_D.txt");
+  //saveAsCCS("CCS_D.txt");
+  //multiplyMatrixVectorCRS("CRS_D.txt");
+  //clearResultVector();
+  //multiplyMatrixVectorCCS("CCS_D.txt");
+  //clearMatrixAndResultVector();  
 }
 
 void MatrixGenerator::initializeMatrixAndVector() {
@@ -508,6 +509,12 @@ void MatrixGenerator::multiplyMatrixVectorCRS(string filename) {
   algorithmOneCRS(crs);
   clearResultVector();
   algorithmTwoCRS(crs);
+  clearResultVector();
+  parallelOpenMP_CRS(crs);
+  clearResultVector();
+  parallelPthreads_CRS(crs);
+  clearResultVector();
+  parallelMPI_CRS(crs);
 }
 
 void MatrixGenerator::algorithmOneCRS(CRS *crs) {
@@ -580,6 +587,89 @@ void MatrixGenerator::algorithmTwoCRS(CRS *crs) {
   cout << "->Time elapsed [CRS]: " << endl; //setprecision(6) << elapsedTime << endl;
   printTime();
   //printResultVector("CRS");
+}
+
+void MatrixGenerator::parallelOpenMP_CRS(CRS* crs) {
+  cout << "Computing CRS... " << flush;
+  initializeTime();
+
+  int ckey = 0, 
+	  j = 0,
+	  chunk = 1000;
+
+  #pragma omp for private(ckey,j) schedule(static,chunk)
+  //#pragma omp parallel for
+  for (int i=0 ; i<m ; i++){
+    for (ckey=crs->rowPtr[i] ; ckey<crs->rowPtr[i+1] ; ckey++) {
+		j = crs->colId[ckey];
+      resultVector[i] += crs->val[ckey] * multiVector[j];
+    }
+  }
+
+  cout << "done parallel OpenMP" << endl;
+  cout << "->Time elapsed [CRS]: " << endl; //setprecision(6) << elapsedTime << endl;
+  printTime();
+}
+
+class PthreadData {
+public:
+	CRS * crs;
+	double * resultVector;
+	double * multiVector;
+	int m;
+	int numThreads;
+	int threadID;
+};
+
+void * algorithmForThread(void * x) {
+  PthreadData * data = (PthreadData *) x;
+  for (int i = (data->threadID) * data->m / data->numThreads ; i<((data->threadID) + 1) * data->m / data->numThreads ; i++) {
+  //for (int i=0 ; i<m ; i++){
+    for (int ckey=data->crs->rowPtr[i] ; ckey<data->crs->rowPtr[i+1] ; ckey++) {
+      data->resultVector[i] += data->crs->val[ckey] * data->multiVector[data->crs->colId[ckey]];
+    }
+  }
+}
+
+void MatrixGenerator::parallelPthreads_CRS(CRS* crs) {
+  cout << "Computing CRS... " << flush;
+
+  pthread_t * threads = new pthread_t[numThreads];
+  
+  PthreadData * data = new PthreadData();
+  data->crs = crs;
+  data->resultVector = resultVector;
+  data->multiVector = multiVector;
+  data->m = m;
+
+  initializeTime();
+  for (int i=0 ; i<numThreads ; i++) {
+	  data->threadID = i;
+	  pthread_create( &threads[i], NULL, algorithmForThread, &data);
+  }
+
+  cout << "done parallel Pthreads" << endl;
+  cout << "->Time elapsed [CRS]: " << endl; //setprecision(6) << elapsedTime << endl;
+  printTime();
+}
+
+void MatrixGenerator::parallelMPI_CRS(CRS* crs) {
+  cout << "Computing CRS... " << flush;
+  initializeTime();
+
+  int ckey = 0, 
+	  j = 0;
+
+  for (int i=0 ; i<m ; i++){
+    for (ckey=crs->rowPtr[i] ; ckey<crs->rowPtr[i+1] ; ckey++) {
+		j = crs->colId[ckey];
+      resultVector[i] += crs->val[ckey] * multiVector[j];
+    }
+  }
+
+  cout << "done parallel MPI" << endl;
+  cout << "->Time elapsed [CRS]: " << endl; //setprecision(6) << elapsedTime << endl;
+  printTime();
 }
 
 void MatrixGenerator::multiplyMatrixVectorCCS(string filename) {
