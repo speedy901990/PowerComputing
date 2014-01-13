@@ -504,6 +504,8 @@ void MatrixGenerator::decompressCCS(CCS ccs) {
     }
 }
 
+//-----------------CRS Algorithms----------------------------------//
+
 void MatrixGenerator::multiplyMatrixVectorCRS(string filename) {
   CRS *crs = loadCRS(filename);
   algorithmOneCRS(crs);
@@ -624,7 +626,6 @@ public:
 void * algorithmForThread(void * x) {
   PthreadData * data = (PthreadData *) x;
   for (int i = (data->threadID) * data->m / data->numThreads ; i<((data->threadID) + 1) * data->m / data->numThreads ; i++) {
-  //for (int i=0 ; i<m ; i++){
     for (int ckey=data->crs->rowPtr[i] ; ckey<data->crs->rowPtr[i+1] ; ckey++) {
       data->resultVector[i] += data->crs->val[ckey] * data->multiVector[data->crs->colId[ckey]];
     }
@@ -657,20 +658,43 @@ void MatrixGenerator::parallelMPI_CRS(CRS* crs) {
   cout << "Computing CRS... " << flush;
   initializeTime();
 
-  int ckey = 0, 
-	  j = 0;
+  // int  numTasks, rank, rc;
+  // MPI_Status status;
+  // MPI_Request req, req1;
+  // rc = MPI_Init(&argc,&argv);
+  // int tab[2010];
+  // int recvbuf[1005];
+  // int messageToSent = 10;
+  // int messageToRespond = 20;
+  
+  // MPI_Comm_size(MPI_COMM_WORLD,&numTasks);
+  // MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+  // printf ("Process count = %d Process ID = %d\n", numTasks,rank);
 
+  // int index = n/numTasks;
+  
+  // // odpowiednie rozesłanie danych
+  // MPI_Bcast(crs,index,MPI_INT,recvbuf,index,MPI_INT,0,MPI_COMM_WORLD);
+  
   for (int i=0 ; i<m ; i++){
-    for (ckey=crs->rowPtr[i] ; ckey<crs->rowPtr[i+1] ; ckey++) {
-		j = crs->colId[ckey];
-      resultVector[i] += crs->val[ckey] * multiVector[j];
+    for (int j=crs->rowPtr[i] ; j<crs->rowPtr[i+1] ; j++) {
+      resultVector[i] += crs->val[j] * multiVector[crs->colId[j]];
     }
   }
+  
+  // MPI_Gather(&recvbuf[0],1,MPI_INT,tab,1,MPI_INT,0,MPI_COMM_WORLD);
+  
+  
+  // MPI_Barrier(MPI_COMM_WORLD);
+  // MPI_Finalize ( );
 
   cout << "done parallel MPI" << endl;
   cout << "->Time elapsed [CRS]: " << endl; //setprecision(6) << elapsedTime << endl;
   printTime();
 }
+
+
+//-----------------CCS Algorithms----------------------------------//
 
 void MatrixGenerator::multiplyMatrixVectorCCS(string filename) {
   CCS *ccs = loadCCS(filename);
